@@ -19,7 +19,7 @@ type DrawerProps = {
 type MenuItem = {
   text: string;
   icon: React.ReactNode;
-  path: string; // ✅ mandatory
+  path: string;
 };
 
 const menuItems: MenuItem[] = [

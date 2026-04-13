@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import axios from "axios";
+import Link from "next/link";
 
 type Car = {
   carid: number;
@@ -64,7 +65,7 @@ export default function CarRental() {
           {currentCards.map((car) => (
             <div
               key={car.carid}
-              className="border rounded-2xl flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow bg-white"
+              className="rounded-2xl flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow bg-white"
             >
               {/* Responsive Image Area */}
               <div className="relative w-full h-40 sm:h-48 bg-gray-50 flex items-center justify-center p-4">
@@ -89,9 +90,14 @@ export default function CarRental() {
                   </p>
                 </div>
 
-                <button className="whitespace-nowrap bg-[#ff5a00] text-white text-[10px] md:text-xs font-bold py-2.5 px-4 rounded-lg hover:bg-orange-600 transition shadow-sm active:scale-95">
+                {/* <button className="whitespace-nowrap bg-[#ff5a00] text-white text-[10px] md:text-xs font-bold py-2.5 px-4 rounded-lg hover:bg-orange-600 transition shadow-sm active:scale-95">
                   View Deal
-                </button>
+                </button> */}
+                <Link href={`/car-details/${car.carid}`}>
+                  <button className="bg-[#ff5a00] text-white text-xs font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition">
+                    View Deal
+                  </button>
+                </Link>
               </div>
             </div>
           ))}
