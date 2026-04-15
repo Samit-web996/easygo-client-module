@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import axios from "axios";
 import Link from "next/link";
@@ -30,13 +30,15 @@ export default function CarRental() {
   const [currentPage, setCurrentPage] = useState(1);
   const cardsPerPage = 8;
 
-  const filteredData = data.filter((car) => car.image);
+  const filteredData = useMemo(() => data.filter((car) => car.image), [data]);
 
-  const indexOfLastCard = currentPage * cardsPerPage;
-  const indexOfFirstCard = indexOfLastCard - cardsPerPage;
-  const currentCards = filteredData.slice(indexOfFirstCard, indexOfLastCard);
+  const totalPages = useMemo(() => Math.ceil(filteredData.length / cardsPerPage), [filteredData.length]);
 
-  const totalPages = Math.ceil(filteredData.length / cardsPerPage);
+  const currentCards = useMemo(() => {
+    const indexOfLastCard = currentPage * cardsPerPage;
+    const indexOfFirstCard = indexOfLastCard - cardsPerPage;
+    return filteredData.slice(indexOfFirstCard, indexOfLastCard);
+  }, [filteredData, currentPage]);
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 bg-white font-sans">

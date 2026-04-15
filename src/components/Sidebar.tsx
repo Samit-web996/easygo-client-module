@@ -26,7 +26,7 @@ const menuItems: MenuItem[] = [
   { text: "Car Rental", icon: <DirectionsCarIcon />, path: "/car-rental" },
   { text: "My Trips", icon: <TravelExploreIcon />, path: "/my-trips" },
   { text: "Favourite Cars", icon: <FavoriteIcon />, path: "/favourites" },
-  { text: "EasyGo Host", icon: <StorefrontIcon />, path: "/host" },
+  { text: "EasyGo Host", icon: <StorefrontIcon />, path: "/easygo-host" },
 ];
 
 const TemporaryDrawer: React.FC<DrawerProps> = ({ open, setOpen }) => {

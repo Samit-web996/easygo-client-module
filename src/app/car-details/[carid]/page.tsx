@@ -82,7 +82,7 @@ export default function CarDetails() {
     );
 
   return (
-    <div className="max-w-5xl mx-auto p-6 font-sans">
+    <div className="max-w-5xl mx-auto p-6 font-sans relative">
       <div className="bg-orange-500 text-white p-3 rounded-t-xl flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span>✔</span> Your selected car
@@ -177,7 +177,7 @@ export default function CarDetails() {
             <button
              onClick={() => setOpen(true)}
               disabled={car.status === "UNAVAILABLE"}
-              className={`px-10 py-3 rounded-xl font-bold text-sm tracking-widest transition-all shadow-md uppercase
+              className={`cursor-pointer px-10 py-3 rounded-xl font-bold text-sm tracking-widest transition-all shadow-md uppercase
                 ${
                   car.status === "UNAVAILABLE"
                     ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
@@ -189,9 +189,9 @@ export default function CarDetails() {
             
            
           </div>
-              <KycForm  isOpen={open} onClose={() => setOpen(false)}/>
         </div>
       </div>
+      <KycForm isOpen={open} onClose={() => setOpen(false)} />
     </div>
   );
 }

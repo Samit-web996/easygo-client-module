@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -5,12 +7,12 @@ import axios from "axios";
 // 1. Define Interface for Form State
 interface KycFormData {
   uid: string;
-  ownerName: string;
-  email: string;
-  aadhar: string;
-  mobile: string;
+  full_name: string;
+  email_id: string;
+  aadhar_no: string;
   address: string;
-  profile_img: File | null;
+  license_no: string;
+  user_photo: File | null;
 }
 
 // 2. Define Props for the Modal
@@ -23,12 +25,12 @@ interface KycFormProps {
 export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
   const [form, setForm] = useState<KycFormData>({
     uid: "",
-    ownerName: "",
-    email: "",
-    aadhar: "",
-    mobile: "",
+    full_name: "",
+    email_id: "",
+    aadhar_no: "",
+    license_no: "",
     address: "",
-    profile_img: null,
+    user_photo: null,
   });
 
   useEffect(() => {
@@ -54,22 +56,26 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!form.aadhar || form.aadhar.length !== 12) {
+    if (!form.aadhar_no || form.aadhar_no.length !== 12) {
       return toast.error("Aadhar must be exactly 12 digits!");
     }
 
     try {
       const formData = new FormData();
-      // TypeScript safety ke liye loop mein types define kiye
+      // TypeScript safety: Append form data correctly
       Object.entries(form).forEach(([key, value]) => {
         if (value !== null) {
-          formData.append(key, value);
+          if (value instanceof File) {
+            formData.append(key, value);
+          } else {
+            formData.append(key, String(value));
+          }
         }
       });
 
-      const res = await axios.post("http://localhost:3006/kyc-update", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+     const res = await axios.patch(`http://localhost:3006/user-kyc/:uid/${form.uid}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
       if (res.status === 200) {
         toast.success("KYC submitted successfully!");
@@ -78,12 +84,12 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
         // Reset Form
         setForm({
           uid: localStorage.getItem("userId") || "",
-          ownerName: "",
-          email: "",
-          aadhar: "",
-          mobile: "",
+          full_name: "",
+          email_id: "",
+          aadhar_no: "",
+          license_no: "",
           address: "",
-          profile_img: null,
+          user_photo: null,
         });
       }
     } catch (err: any) {
@@ -96,18 +102,22 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
 
   return (
     /* Background Overlay: Isko 'fixed' aur 'z-[9999]' hona chahiye */
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md overflow-hidden">
+    <div className="border-20 fixed inset-0 z-[99999] flex items-center justify-center p-4">
+      {/* <div 
+        className="absolute inset-0 bg-black/70 backdrop-blur-md animate-in fade-in duration-300"
+        onClick={onClose} // Piche click karne par modal band ho jaye
+      ></div> */}
       
       {/* Modal Container: Screen ke center mein float karega */}
-      <div className="relative w-full max-w-xl max-h-[90vh] rounded-3xl bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden text-gray-800 animate-in fade-in zoom-in duration-300">
+      <div className="border-20 relative w-full max-w-xl max-h-[90vh] rounded-[32px] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden text-gray-800 animate-in fade-in zoom-in duration-300">
         
         {/* Close Button: Top Right corner par stylish wala */}
-        <button 
+        {/* <button 
           onClick={onClose} 
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-all z-10 p-2 hover:bg-gray-100 rounded-full"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
+        </button> */}
 
         {/* HEADER */}
         <div className="p-6 border-b bg-gray-50/50">
@@ -116,12 +126,13 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
         </div>
 
         {/* FORM BODY */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4">
+        <form onSubmit={handleSubmit} className="p-8 overflow-y-auto space-y-5 custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Input label="Full Name" name="ownerName" value={form.ownerName} onChange={handleChange} placeholder="Sunny Raj" />
-            <Input label="Email Address" name="email" type="email" value={form.email} onChange={handleChange} placeholder="sunny@example.com" />
-            <Input label="Aadhar Number" name="aadhar" value={form.aadhar} onChange={handleChange} maxLength={12} placeholder="XXXX XXXX XXXX" />
-            <Input label="Contact Number" name="mobile" value={form.mobile} onChange={handleChange} maxLength={10} placeholder="9876543210" />
+            <Input label="Full Name" name="full_name" value={form.full_name} onChange={handleChange} placeholder="Sunny Raj" />
+            <Input label="Email Address" name="email_id" type="email" value={form.email_id} onChange={handleChange} placeholder="sunny@example.com" />
+            <Input label="Aadhar Number" name="aadhar_no" value={form.aadhar_no} onChange={handleChange} maxLength={12} placeholder="XXXX XXXX XXXX" />
+            <Input label="License Number " name="license_no" value={form.license_no} onChange={handleChange} maxLength={12} placeholder="XXXX XXXX XXXX" />
+            {/* <Input label="Contact Number" name="mobile" value={form.mobile} onChange={handleChange} maxLength={10} placeholder="9876543210" /> */}
             
             <div className="md:col-span-2">
               <label className="text-sm font-bold text-gray-700 mb-1.5 block uppercase tracking-wider">Current Address</label>
@@ -150,14 +161,14 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
           <div className="flex justify-end items-center gap-4 pt-4 mt-4 border-t border-gray-100">
             <button 
               type="button" 
-              onClick={onClose} 
-              className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-all"
+              onClick={onClose}   
+              className="px-6 py-2.5 text-sm font-bold text-gray-400  hover:text-gray-600 uppercase tracking-widest transition-all"
             >
               Discard
             </button>
             <button 
               type="submit" 
-              className="bg-indigo-600 text-white px-10 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 active:scale-95 transition-all"
+              className="bg-indigo-600 text-indigo-400 px-10 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 active:scale-95 transition-all"
             >
               Submit KYC
             </button>
@@ -176,19 +187,21 @@ interface InputProps {
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   type?: string;
   maxLength?: number;
+  placeholder?: string;
 }
 
-function Input({ label, name, value, onChange, type = "text", maxLength }: InputProps) {
+function Input({ label, name, value, onChange, type = "text", maxLength, placeholder }: InputProps) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-semibold">{label}</label>
+    <div className="flex flex-col gap-1.5 w-full">
+      <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">{label}</label>
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
         maxLength={maxLength}
-        className="p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+        placeholder={placeholder}
+        className="w-full p-3 border-2 border-gray-100 rounded-xl outline-none focus:border-indigo-500 transition-all bg-gray-50/50 text-gray-800 placeholder:text-gray-300"
         required
       />
     </div>

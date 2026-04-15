@@ -1,13 +1,20 @@
+"use client";
+
 import React from "react";
 import { Menu } from "lucide-react";
 import { FaUser } from "react-icons/fa";
 import TemporaryDrawer from "./Sidebar";
 import Link from "next/link";
+import { useState } from "react";
+import LoginModal from "@/components/LoginSignup";
+import BasicModal from "./Modal";
 
 const Navbar: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false);
+    const [open, setOpen] = useState(false);
 
   return (
+    <>
     <nav className="bg-white text-black shadow-sm border-b border-gray-200 sticky top-0 z-50 shrink-0">
       <div className="px-4 h-16 flex items-center justify-between">
         
@@ -26,12 +33,20 @@ const Navbar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <button 
+          onClick={() => setOpen(true)}
+          className="cursor-pointer border font-semibold rounded-3xl px-3 py-2">
+            Login/Signup
+          </button>
+      <BasicModal/>
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 border border-gray-200">
             <FaUser size={20} />
           </div>
         </div>
       </div>
     </nav>
+    <LoginModal isOpen={open} onClose={() => setOpen(false)} />
+    </>
   );
 };
 
