@@ -62,7 +62,7 @@ function ApplyBooking() {
                 <button
                   key={i}
                   onClick={() => setActiveTab(item)}
-                  className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all
+                  className={`cursor-pointer px-6 py-2.5 rounded-full text-sm font-bold transition-all
                   ${activeTab === item ? "bg-orange-500 text-white shadow-lg" : "bg-white text-gray-700 hover:bg-gray-200"}`}
                 >
                   {item}

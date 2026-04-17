@@ -2,7 +2,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import KycForm from "@/app/contact-information/page";
+import KycForm from "@/app/user-kyc/page";
+import LoginModal from "@/components/LoginSignup";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 interface Car {
   carid: number;
@@ -13,7 +16,7 @@ interface Car {
   seat: number;
   features: string;
   fuelType: string;
-  price_per_km: string | number;
+  pricePerDay: string | number;
   modelYear: string | number;
   status: "AVAILABLE" | "UNAVAILABLE";
   image: string | null;
@@ -26,13 +29,15 @@ interface RatingItem {
 }
 
 export default function CarDetails() {
+  const router = useRouter();
   const params = useParams();
   const carid = params?.carid as string;
-
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [ratingData, setRatingData] = useState<RatingItem[]>([]);
-  const [open, setOpen] = useState<boolean>(false);
+  // const [open, setOpen] = useState<boolean>(false);
+  const [showLogin, setShowLogin] = useState<boolean>(false);
+  const [showKyc, setShowKyc] = useState<boolean>(false);
 
   useEffect(() => {
     const getCarInfo = async () => {
@@ -80,6 +85,64 @@ export default function CarDetails() {
         Car not found!
       </div>
     );
+
+  const handleBookingLogic = async () => {
+  const uid = localStorage.getItem("userId");
+
+  // 1. Checkpoint: Login check
+  if (!uid) {
+    setShowLogin(true);
+    return;
+  }
+
+  if (!car) {
+    toast.error("Car details are loading, please wait...");
+    return;
+  }
+  
+if (car.status === "UNAVAILABLE") {
+      toast.error("Maaf karein, ye car abhi available nahi hai.");
+      return;
+    }
+  
+
+  try {
+    const res = await axios.get(`http://localhost:3006/kyc-status/${uid}`);
+    
+    // Debugging ke liye console zaroor check karna
+    console.log("Full Response Data:", res.data);
+
+    // Case A: Agar Record hi nahi hai
+    if (!res.data.exist) {
+      setShowKyc(true);
+      return;
+    }
+
+    // Status ko clean (trim) karke variable mein le lo
+    const currentStatus = res.data.status ? res.data.status.trim() : "";
+
+    // Case-wise handling
+    if (currentStatus === "pending") {
+      // Case B: Pending status
+      toast.info("KYC Under Review: Your verification is in progress. ⏳");
+      setShowKyc(false); // Make sure form na khule
+    } 
+    else if (currentStatus === "verified") {
+      // Case C: Verified
+      toast.success("KYC Approved: Proceeding with your booking.");
+      router.push(`/booking/${carid}`); 
+    } 
+    else if (currentStatus === "rejected") {
+      // Case D: Rejected
+      toast.error("KYC Rejected: Please re-submit with valid details.");
+      setShowKyc(true); // Is case mein form khulega
+    }
+
+  } catch (err) {
+    console.error("KYC Fetch Error:", err);
+    toast.error("Service Error: Unable to fetch KYC status.");
+  }
+};
 
   return (
     <div className="max-w-5xl mx-auto p-6 font-sans relative">
@@ -144,7 +207,7 @@ export default function CarDetails() {
               ✅ <b>Trusted Owner:</b> {car.owner_name}
             </div>
             <div className="flex items-center gap-2">
-             <b>🛡️ EasyGo Assured</b>
+              <b>🛡️ EasyGo Assured</b>
             </div>
           </div>
 
@@ -167,15 +230,15 @@ export default function CarDetails() {
           <div className="flex justify-between items-center border-t pt-6">
             <div>
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                Price per KM
+                Price Per Day
               </p>
               <h2 className="text-3xl font-black text-blue-600">
-                INR {car.price_per_km}
+                INR {car.pricePerDay}
               </h2>
             </div>
 
             <button
-             onClick={() => setOpen(true)}
+              onClick={handleBookingLogic}
               disabled={car.status === "UNAVAILABLE"}
               className={`cursor-pointer px-10 py-3 rounded-xl font-bold text-sm tracking-widest transition-all shadow-md uppercase
                 ${
@@ -186,12 +249,23 @@ export default function CarDetails() {
             >
               {car.status === "UNAVAILABLE" ? "Not Available" : "Book Now"}
             </button>
-            
-           
           </div>
         </div>
       </div>
-      <KycForm isOpen={open} onClose={() => setOpen(false)} />
+      <LoginModal 
+      isOpen={showLogin} 
+  onClose={() => setShowLogin(false)} 
+  onLoginSuccess={() => {
+    setShowLogin(false);
+    window.location.reload(); 
+  }} />
+      <KycForm 
+      isOpen={showKyc} 
+  onClose={() => setShowKyc(false)} 
+  onSuccess={() => {
+    setShowKyc(false);
+    toast.success("KYC Submitted! Ab hum verify karenge.");
+  }} />
     </div>
   );
 }

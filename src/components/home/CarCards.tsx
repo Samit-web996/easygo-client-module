@@ -96,7 +96,7 @@ export default function CarRental() {
                   View Deal
                 </button> */}
                 <Link href={`/car-details/${car.carid}`}>
-                  <button className="bg-[#ff5a00] text-white text-xs font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition">
+                  <button className="cursor-pointer bg-[#ff5a00] text-white text-xs font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition">
                     View Deal
                   </button>
                 </Link>
