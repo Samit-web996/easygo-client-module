@@ -109,8 +109,7 @@ if (car.status === "UNAVAILABLE") {
   try {
     const res = await axios.get(`http://localhost:3006/kyc-status/${uid}`);
     
-    // Debugging ke liye console zaroor check karna
-    console.log("Full Response Data:", res.data);
+    // console.log("Full Response Data:", res.data);
 
     // Case A: Agar Record hi nahi hai
     if (!res.data.exist) {
@@ -118,7 +117,6 @@ if (car.status === "UNAVAILABLE") {
       return;
     }
 
-    // Status ko clean (trim) karke variable mein le lo
     const currentStatus = res.data.status ? res.data.status.trim() : "";
 
     // Case-wise handling
@@ -264,7 +262,7 @@ if (car.status === "UNAVAILABLE") {
   onClose={() => setShowKyc(false)} 
   onSuccess={() => {
     setShowKyc(false);
-    toast.success("KYC Submitted! Ab hum verify karenge.");
+    // toast.success("KYC Submitted! Ab hum verify karenge.");
   }} />
     </div>
   );

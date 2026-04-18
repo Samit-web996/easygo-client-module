@@ -393,7 +393,7 @@ export default function BookingPage() {
                   car.status !== "AVAILABLE" ||
                   new Date(returnDate) <= new Date(pickupDate)
                 }
-                className={`w-full mt-6 py-4 px-4 rounded-xl font-bold text-white transition-all duration-300 transform active:scale-95 ${
+                className={`cursor-pointer w-full mt-6 py-4 px-4 rounded-xl font-bold text-white transition-all duration-300 transform active:scale-95 ${
                   isProcessing ||
                   !pickupDate ||
                   !returnDate ||

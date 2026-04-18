@@ -8,9 +8,9 @@ import axios from "axios";
 // 1. Define Interface for Form State
 interface KycFormData {
   uid: string;
-  full_name: string;
+  // full_name: string;
+  // email_id: string;
   mobile_no: string;
-  email_id: string;
   aadhar_no: string;
   current_address: string;
   license_no: string;
@@ -28,8 +28,8 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
   const [form, setForm] = useState<KycFormData>({
     uid:
       typeof window !== "undefined" ? localStorage.getItem("userId") || "" : "",
-    full_name: "",
-    email_id: "",
+    // full_name: "",
+    // email_id: "",
     mobile_no: "",
     aadhar_no: "",
     license_no: "",
@@ -69,11 +69,11 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
 
     try {
       const formData = new FormData();
-      formData.append("full_name", form.full_name);
+      // formData.append("full_name", form.full_name);
+      // formData.append("email_id", form.email_id);
       formData.append("aadhar_no", form.aadhar_no);
       formData.append("license_no", form.license_no);
       formData.append("current_address", form.current_address);
-      formData.append("email_id", form.email_id);
       formData.append("mobile_no", localStorage.getItem("userMobile") || "");
       if (form.user_photo) {
         // Agar state ke andar 'user_photo' hai
@@ -100,8 +100,8 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
         // Reset Form
         setForm({
           uid: localStorage.getItem("userId") || "",
-          full_name: "",
-          email_id: "",
+          // full_name: "",
+          // email_id: "",
           mobile_no: localStorage.getItem("userMobile") || "",
           aadhar_no: "",
           license_no: "",
@@ -145,7 +145,7 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
           className="p-8 overflow-y-auto space-y-5 custom-scrollbar"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Input
+            {/* <Input
               label="Full Name"
               name="full_name"
               value={form.full_name}
@@ -159,7 +159,7 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
               value={form.email_id}
               onChange={handleChange}
               placeholder="sunny@example.com"
-            />
+            /> */}
             <Input
               label="Mobile Number"
               name="mobile_no"
