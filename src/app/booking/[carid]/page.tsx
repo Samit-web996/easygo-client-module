@@ -2,33 +2,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+// import Image from "next/image";
 import { useParams } from "next/navigation";
 import axios from "axios";
+import { toast } from "react-toastify";
 
-// Mock car data - replace with your actual data fetching logic
-const carDetails = {
-  // id: 1,
-  // name: 'Tesla Model 3',
-  // type: 'Electric Sedan',
-  // image: '/cars/tesla-model-3.jpg', // Ensure this image exists in your public folder
-  // seats: 5,
-  // transmission: 'Automatic',
-  pricePerDay: 5999,
-  // features: ['GPS Navigation', 'Bluetooth Audio', 'Backup Camera', 'Heated Seats'],
-  // description: 'Experience the future of driving with the Tesla Model 3. Zero emissions, instant torque, and a minimalist interior with a 15-inch touchscreen.'
-};
-
-// Payment options
-const paymentOptions = [
-  { id: "card", name: "Credit/Debit Card", icon: "💳" },
-  { id: "upi", name: "UPI (Google Pay, PhonePe, etc.)", icon: "📱" },
-  { id: "netbanking", name: "Net Banking", icon: "🏦" },
-  { id: "cod", name: "Pay at Pickup", icon: "💵" },
-];
 interface Car {
   carid: number;
-  // cancellation: string;
   carName: string;
   brand: string;
   model: string;
@@ -48,12 +28,13 @@ interface RatingItem {
 }
 
 export default function BookingPage() {
-  const [selectedPayment, setSelectedPayment] = useState("card");
+  // const [selectedPayment, setSelectedPayment] = useState("card");
   const [rentalDays, setRentalDays] = useState(1);
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const params = useParams();
+  // const { carid } = useParams();
   const carid = params?.carid as string;
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -107,10 +88,11 @@ export default function BookingPage() {
     );
 
   // Calculate total amount
-  const subtotal = carDetails.pricePerDay * rentalDays;
-  const tax = subtotal * 0.18; // 18% GST
-  const total = subtotal + tax;
+const subtotal = Number(car.pricePerDay) * rentalDays;
+const tax = subtotal * 0.18; 
+const total = subtotal + tax;
 
+  
   // Handle date changes and calculate days
   const handlePickupDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value;
@@ -136,17 +118,87 @@ export default function BookingPage() {
     }
   };
 
-  const handleBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    alert("Booking confirmed! (Demo)");
+  // const handleBooking = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsProcessing(true);
+  //   // Simulate API call
+  //   await new Promise((resolve) => setTimeout(resolve, 2000));
+  //   alert("Booking confirmed! (Demo)");
+  //   setIsProcessing(false);
+  // };
+
+  const handlePayment = async () => {
+  if (total <= 0) {
+    alert("Invalid total amount");
+    return;
+  }
+
+  // --- Naya Logic: Data collect karo ---
+  const userId = localStorage.getItem("userId"); // Ya jo bhi aapka key hai
+  const carId = carid;
+
+  if (!userId || !carId) {
+    // alert("User ID ya Car ID nahi mil rahi. Login check karein.");
+    return;
+  }
+console.log("Sending to backend:", { total, userId, carid });
+  setIsProcessing(true);
+  try {
+    // 1. Backend Call (Ab hum uid aur car_id bhi bhej rahe hain)
+    const res = await axios.post("http://localhost:3006/api/create-order", {
+      amount: Math.round(total),
+      uid: userId,     
+      car_id: carId  
+    });
+
+    console.log("Backend Response:", res.data);
+
+    const orderId = res.data.order_id;
+    const amountInPaise = res.data.amount;
+
+    const savedEmail = localStorage.getItem("temp_email") || localStorage.getItem("userEmail");
+
+    // 2. Razorpay Options
+    const options = {
+      key: "rzp_test_Sfhi7kk6ImCyYe", 
+      amount:amountInPaise,
+      currency: "INR",
+      name: "EasyGo Rentals",
+      description: `Booking for ${car.carName}`,
+      order_id: orderId,     
+      handler: function (response: any) {
+        setIsProcessing(false);
+        // Payment success hone par yahan se redirection bhi kar sakte ho
+        toast.success("Booking confirmed successfully.");
+        console.log("Payment ID:", response.razorpay_payment_id);
+      },
+      prefill: {
+        name: localStorage.getItem("userName") || "User", 
+        email: savedEmail,
+        contact:localStorage.getItem("userMobile") || ""
+      },
+      theme: { color: "#f97316" },
+      modal: {
+        ondismiss: function() {
+          setIsProcessing(false);
+        }
+      }
+      
+    };
+    
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+
+  } catch (error) {
+    console.error("Payment Error:", error);
+    alert("Payment start nahi ho paya. Backend check karein.");
     setIsProcessing(false);
-  };
+  }
+};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -354,7 +406,7 @@ export default function BookingPage() {
               </div>
 
               {/* Payment Options */}
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <h4 className="font-semibold text-gray-900 mb-3">
                   Select Payment Method
                 </h4>
@@ -381,11 +433,11 @@ export default function BookingPage() {
                     </label>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Book Now Button */}
               <button
-                onClick={handleBooking}
+                onClick={() => {handlePayment()}}
                 disabled={
                   isProcessing ||
                   !pickupDate ||

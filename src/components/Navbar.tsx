@@ -16,17 +16,18 @@ const Navbar: React.FC = () => {
 useEffect(() => {
   if (typeof window !== "undefined") {
     const savedName = localStorage.getItem("userName");
-    if (savedName && savedName !== userName) {
+    if (savedName) {
       setUserName(savedName);
     }
   }
-}, [userName]);
+}, []);
   return (
     <>
       <nav className="bg-white text-black shadow-sm border-b border-gray-200 sticky top-0 z-50 shrink-0">
         <div className="px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
+              suppressHydrationWarning={true}
               onClick={() => setSidebarOpen(true)}
               className="cursor-pointer p-2 text-gray-600 hover:text-black transition-all duration-300 hover:scale-110"
             >
@@ -56,8 +57,9 @@ useEffect(() => {
                 </div>
               </div>
             ) : (
-              // ❌ Jab user login na ho (Button dikhega)
+             
               <button
+              suppressHydrationWarning={true}
                 onClick={() => setOpen(true)}
                 className="cursor-pointer border-2 border-orange-500 text-orange-600 hover:bg-orange-500 hover:text-white transition-all font-semibold rounded-3xl px-6 py-2"
               >

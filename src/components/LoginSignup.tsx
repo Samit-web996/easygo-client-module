@@ -48,111 +48,118 @@ export default function LoginModal({
     }
   };
 
-  // Step 1 -> Step 2 (Check if User is New)
-  const handleMobileSubmit = async () => {
-    if (mobile.length !== 10) return;
-    setLoading(true);
-    try {
-      // Yahan apna backend endpoint call karein
-      const res = await axios.post("http://localhost:3006/api/check-user", {
-        mobile: "+91" + mobile,
-      });
+  // Step 1 -> Step 2 ya seedha Step 3 (Check if User is New)
+const handleMobileSubmit = async () => {
+  if (mobile.length !== 10) return;
+  setLoading(true);
+  try {
+    const res = await axios.post("http://localhost:3006/api/check-user", {
+      mobile: "+91" + mobile,
+    });
 
-      if (res.data.exists) {
-        localStorage.setItem("temp_name", res.data.user.full_name);
-        localStorage.setItem("temp_email", res.data.user.email_id || "");
+    if (res.data.exists) {
+      // --- CASE 1: User Pehle se hai ---
+      const user = res.data.user; // res.data.users ki jagah user (check your backend)
 
-        await sendOTPRequest();
-      } else {
-        setStep(2);
-      }
-    } catch (error: unknown) {
-      setStep(2);
-    } finally {
-      setLoading(false);
+      // DB se data lekar temp storage mein daalo
+      localStorage.setItem("temp_name", user.name || user.full_name || "");
+      localStorage.setItem("temp_email", user.email_id || user.email || "");
+      
+      console.log("Existing user found, sending OTP...");
+      
+      // Seedha OTP bhej ke Step 3 par jump karo
+      await sendOTPRequest(); 
+    } else {
+      // --- CASE 2: User Naya hai ---
+      setStep(2); // Name/Email form dikhao
     }
-  };
+  } catch (error: unknown) {
+    console.error("Check user error:", error);
+    toast.error("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
-  // Step 2 -> Step 3 (Save details & Send OTP)
-  const handleDetailsSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      toast.error("Please enter your name");
-      return;
+// Step 2 -> Step 3 (New User Details save & Send OTP)
+const handleDetailsSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!name.trim()) {
+    toast.error("Please enter your name");
+    return;
+  }
+  
+  // User ne jo form bhara hai use save karo
+  localStorage.setItem("temp_name", name);
+  localStorage.setItem("temp_email", email);
+
+  // Details mil gayi, ab OTP bhejo aur Step 3 par jao
+  await sendOTPRequest();
+};
+
+const sendOTPRequest = async () => {
+  try {
+    setupRecaptcha();
+    const result = await signInWithPhoneNumber(
+      auth,
+      "+91" + mobile,
+      window.recaptchaVerifier,
+    );
+    setConfirmation(result);
+    
+    // OTP bhejte hi Step 3 (OTP Verification) par bhej do
+    setStep(3); 
+    toast.success("OTP sent successfully");
+  } catch (error) {
+    console.error("Firebase Auth Error:", error);
+    toast.error("Error sending OTP. Try again.");
+    // Agar error aaye toh wapas step 1 par bhej sakte ho
+    setStep(1);
+  }
+};
+
+const verifyOTP = async () => {
+  try {
+    if (!confirmation) return;
+
+    const result = await confirmation.confirm(otp);
+    const firebaseUser = result.user;
+
+    // LocalStorage se data uthao (Chahe DB se aaya ho ya Form se)
+    const finalName = localStorage.getItem("temp_name") || "User";
+    const finalEmail = localStorage.getItem("temp_email") || "";
+
+    const userData = {
+      uid: firebaseUser.uid,
+      full_name: finalName,
+      email_id: finalEmail,
+      mobile_no: "+91" + mobile,
+    };
+
+    const dbRes = await axios.post(
+      "http://localhost:3006/api/auth/login",
+      userData,
+    );
+
+    if (dbRes.data.success) {
+      localStorage.setItem("userId", firebaseUser.uid);
+      localStorage.setItem("userName", finalName);
+      localStorage.setItem("userMobile", "+91" + mobile);
+      localStorage.setItem("userEmail", finalEmail); 
+
+      localStorage.removeItem("temp_name");
+      localStorage.removeItem("temp_email");
+
+      toast.success("Login Successful! ");
+      if (onLoginSuccess) onLoginSuccess();
+      onClose();
+      window.location.reload();
     }
-    // LocalStorage mein temporary save karlo
-    localStorage.setItem("temp_name", name);
-    localStorage.setItem("temp_email", email);
-
-    await sendOTPRequest();
-  };
-
-  const sendOTPRequest = async () => {
-    try {
-      setupRecaptcha();
-      const result = await signInWithPhoneNumber(
-        auth,
-        "+91" + mobile,
-        window.recaptchaVerifier,
-      );
-      setConfirmation(result);
-      setStep(3); // OTP Step
-      toast.success("OTP sent successfully");
-    } catch (error) {
-      console.error(error);
-      toast.error("Error sending OTP. Try again.");
-    }
-  };
-
-  const verifyOTP = async () => {
-    try {
-      if (!confirmation) return;
-
-      // 1. Firebase se OTP verify karo
-      const result = await confirmation.confirm(otp);
-      const firebaseUser = result.user;
-
-      // 2. LocalStorage se temporary data uthao
-      const finalName = localStorage.getItem("temp_name") || "User";
-      const finalEmail = localStorage.getItem("temp_email") || null;
-
-      // 3. ✅ AB BACKEND KO DATA BHEJO (Ye part missing tha)
-      const userData = {
-        uid: firebaseUser.uid,
-        full_name: finalName,
-        email_id: finalEmail,
-        mobile_no: "+91" + mobile,
-      };
-
-      const dbRes = await axios.post(
-        "http://localhost:3006/api/auth/login",
-        userData,
-      );
-
-      if (dbRes.data.success) {
-        localStorage.setItem("userId", firebaseUser.uid);
-        localStorage.setItem("userName", finalName);
-        localStorage.setItem("userMobile", "+91" + mobile);
-
-        // Temp data saaf kar do
-        localStorage.removeItem("temp_name");
-        localStorage.removeItem("temp_email");
-
-        toast.success("Login Successful! 🎉");
-
-        if (onLoginSuccess) onLoginSuccess();
-        onClose();
-
-        // Navbar update karne ke liye page refresh ya state update zaroori hai
-        window.location.reload();
-      }
-    } catch (error: any) {
-      console.error("Verification Error:", error);
-      toast.error(
-        error.response?.data?.error || "Invalid OTP or Database Error",
-      );
-    }
-  };
+  } catch (error) {
+    console.error("Verification Error:", error);
+    toast.error("Invalid OTP or Database Error");
+  }
+};
 
   if (!isOpen) return null;
 
@@ -171,7 +178,7 @@ export default function LoginModal({
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-[850px] h-auto md:h-[550px] bg-white rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden"
+          className="relative w-full max-w-212.5 h-auto md:h-137.5 bg-white rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden"
         >
           {/* LEFT SIDE IMAGE */}
           <div className="hidden md:block w-[40%] relative">
@@ -190,7 +197,7 @@ export default function LoginModal({
           </div>
 
           {/* RIGHT SIDE FORM */}
-          <div className="w-full md:w-[60%] p-8 md:p-12 flex flex-col relative bg-white min-h-[450px]">
+          <div className="w-full md:w-[60%] p-8 md:p-12 flex flex-col relative bg-white min-h-112.5">
             <button
               onClick={onClose}
               className="absolute top-5 right-6 text-gray-400 hover:text-black transition-colors"
