@@ -41,18 +41,6 @@ function ApplyBooking() {
   const [availableCities, setAvailableCities] = React.useState<Location[]>([]); // DB se aane wali cities
   const [selectedLocId, setSelectedLocId] = useState<number | null>(null);
 
-  // React.useEffect(() => {
-  //   const fetchCities = async () => {
-  //     try {
-  //       const res = await axios.get("http://localhost:3006/seach-city"); // Aapka locations API
-  //       setAvailableCities(res.data); // Maan lo backend [{loc_id:1, city_name:'Bhopal'}, ...] bhej raha hai
-  //     } catch (err) {
-  //       console.error("Cities load nahi ho payi", err);
-  //     }
-  //   };
-  //   fetchCities();
-  // }, []);
-
   const handleCitySearch = async (value: string) => {
     setCity(value);
     setSelectedLocId(null);
@@ -69,7 +57,6 @@ function ApplyBooking() {
 
 const onSearch = () => {
   if (selectedLocId) {
-    // Is path ko apne folder name (search-results) se match karein
     router.push(`/city-search?loc_id=${selectedLocId}`); 
   } else {
     toast.error('Please select a city first!')

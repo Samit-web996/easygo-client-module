@@ -1,4 +1,4 @@
-// app/booking/page.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -22,23 +22,22 @@ interface Car {
   description: string;
   email: string;
   owner_name: string;
-}
-interface RatingItem {
-  rating: number;
-}
+};
 
 export default function BookingPage() {
   // const [selectedPayment, setSelectedPayment] = useState("card");
   const [rentalDays, setRentalDays] = useState(1);
-  const [pickupDate, setPickupDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
+  // const [pickupDate, setPickupDate] = useState("");
+  // const [returnDate, setReturnDate] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const params = useParams();
   // const { carid } = useParams();
   const carid = params?.carid as string;
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [ratingData, setRatingData] = useState<RatingItem[]>([]);
+  const [ratingData, setRatingData] = useState<{avgRating: number, totalReviews: number} | null>(null);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   useEffect(() => {
     const getCarInfo = async () => {
@@ -65,138 +64,211 @@ export default function BookingPage() {
         setRatingData(res.data);
       } catch (err) {
         console.log("error:", err);
+        setRatingData({ avgRating: 0, totalReviews: 0 });
       }
     };
     if (carid) getRating();
   }, [carid]);
 
-  const calculateAvg = () => {
-    if (ratingData.length === 0) return "No Ratings";
-    const sum = ratingData.reduce((acc, curr) => acc + curr.rating, 0);
-    return (sum / ratingData.length).toFixed(1);
-  };
 
-  if (loading)
-    return (
-      <div className="p-10 text-center font-sans">Loading car details...</div>
-    );
-  if (!car)
-    return (
-      <div className="p-10 text-center text-red-500 font-sans font-bold">
-        Car not found!
-      </div>
-    );
+  // if (loading)
+  //   return (
+  //     <div className="p-10 text-center font-sans">Loading car details...</div>
+  //   );
+  // if (!car)
+  //   return (
+  //     <div className="p-10 text-center text-red-500 font-sans font-bold">
+  //       Car not found!
+  //     </div>
+  //   );
 
-  // Calculate total amount
-const subtotal = Number(car.pricePerDay) * rentalDays;
-const tax = subtotal * 0.18; 
-const total = subtotal + tax;
+  // const subtotal = Number(car.pricePerDay) * rentalDays;
+  // const tax = subtotal * 0.18;
+  // const total = subtotal + tax;
 
-  
-  // Handle date changes and calculate days
-  const handlePickupDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value;
-    setPickupDate(date);
-    if (returnDate && date) {
-      const days = Math.ceil(
-        (new Date(returnDate).getTime() - new Date(date).getTime()) /
-          (1000 * 60 * 60 * 24),
-      );
-      setRentalDays(days > 0 ? days : 1);
-    }
-  };
-
-  const handleReturnDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value;
-    setReturnDate(date);
-    if (pickupDate && date) {
-      const days = Math.ceil(
-        (new Date(date).getTime() - new Date(pickupDate).getTime()) /
-          (1000 * 60 * 60 * 24),
-      );
-      setRentalDays(days > 0 ? days : 1);
-    }
-  };
-
-  // const handleBooking = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsProcessing(true);
-  //   // Simulate API call
-  //   await new Promise((resolve) => setTimeout(resolve, 2000));
-  //   alert("Booking confirmed! (Demo)");
-  //   setIsProcessing(false);
+  // // Handle date changes and calculate days
+  // const handlePickupDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const date = e.target.value;
+  //   setPickupDate(date);
+  //   if (returnDate && date) {
+  //     const days = Math.ceil(
+  //       (new Date(returnDate).getTime() - new Date(date).getTime()) /
+  //         (1000 * 60 * 60 * 24),
+  //     );
+  //     setRentalDays(days > 0 ? days : 1);
+  //   }
   // };
 
+  // const handleReturnDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const date = e.target.value;
+  //   setReturnDate(date);
+  //   if (pickupDate && date) {
+  //     const days = Math.ceil(
+  //       (new Date(date).getTime() - new Date(pickupDate).getTime()) /
+  //         (1000 * 60 * 60 * 24),
+  //     );
+  //     setRentalDays(days > 0 ? days : 1);
+  //   }
+  // };
+
+  // // const handleBooking = async (e: React.FormEvent) => {
+  // //   e.preventDefault();
+  // //   setIsProcessing(true);
+  // //   // Simulate API call
+  // //   await new Promise((resolve) => setTimeout(resolve, 2000));
+  // //   alert("Booking confirmed! (Demo)");
+  // //   setIsProcessing(false);
+  // // };
+
+  // const handlePayment = async () => {
+  //   if (total <= 0) {
+  //     alert("Invalid total amount");
+  //     return;
+  //   }
+
+  //   // --- Naya Logic: Data collect karo ---
+  //   const userId = localStorage.getItem("userId"); // Ya jo bhi aapka key hai
+  //   const carId = carid;
+
+  //   if (!userId || !carId) {
+  //     // alert("User ID ya Car ID nahi mil rahi. Login check karein.");
+  //     return;
+  //   }
+  //   console.log("Sending to backend:", { total, userId, carid });
+  //   setIsProcessing(true);
+  //   try {
+  //     // 1. Backend Call (Ab hum uid aur car_id bhi bhej rahe hain)
+  //     const res = await axios.post("http://localhost:3006/api/create-order", {
+  //       amount: Math.round(total),
+  //       uid: userId,
+  //       car_id: carId,
+  //     });
+
+  //     console.log("Backend Response:", res.data);
+
+  //     const orderId = res.data.order_id;
+  //     const amountInPaise = res.data.amount;
+
+  //     const savedEmail =
+  //       localStorage.getItem("temp_email") || localStorage.getItem("userEmail");
+
+  //     // 2. Razorpay Options
+  //     const options = {
+  //       key: "rzp_test_Sfhi7kk6ImCyYe",
+  //       amount: amountInPaise,
+  //       currency: "INR",
+  //       name: "EasyGo Rentals",
+  //       description: `Booking for ${car.carName}`,
+  //       order_id: orderId,
+  //       handler: function (response: any) {
+  //         setIsProcessing(false);
+  //         // Payment success hone par yahan se redirection bhi kar sakte ho
+  //         toast.success("Booking confirmed successfully.");
+  //         console.log("Payment ID:", response.razorpay_payment_id);
+  //       },
+  //       prefill: {
+  //         name: localStorage.getItem("userName") || "User",
+  //         email: savedEmail,
+  //         contact: localStorage.getItem("userMobile") || "",
+  //       },
+  //       theme: { color: "#f97316" },
+  //       modal: {
+  //         ondismiss: function () {
+  //           setIsProcessing(false);
+  //         },
+  //       },
+  //     };
+
+  //     const rzp = new (window as any).Razorpay(options);
+  //     rzp.open();
+  //   } catch (error) {
+  //     console.error("Payment Error:", error);
+  //     alert("Payment start nahi ho paya. Backend check karein.");
+  //     setIsProcessing(false);
+  //   }
+  // };
+
+  const handleDateChange = (start: string, end: string) => {
+    if (start && end) {
+      const diff = new Date(end).getTime() - new Date(start).getTime();
+      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      setRentalDays(days > 0 ? days : 1);
+    }
+  };
+
+  const formatDateTimeForDB = (date : any) => {
+    if (!date) return null;
+    const d = new Date(date);
+    return d.toISOString().slice(0, 19).replace("T", " ");
+  };
+
   const handlePayment = async () => {
-  if (total <= 0) {
-    alert("Invalid total amount");
-    return;
-  }
-
-  // --- Naya Logic: Data collect karo ---
-  const userId = localStorage.getItem("userId"); // Ya jo bhi aapka key hai
-  const carId = carid;
-
-  if (!userId || !carId) {
-    // alert("User ID ya Car ID nahi mil rahi. Login check karein.");
-    return;
-  }
-console.log("Sending to backend:", { total, userId, carid });
-  setIsProcessing(true);
-  try {
-    // 1. Backend Call (Ab hum uid aur car_id bhi bhej rahe hain)
-    const res = await axios.post("http://localhost:3006/api/create-order", {
-      amount: Math.round(total),
-      uid: userId,     
-      car_id: carId  
-    });
-
-    console.log("Backend Response:", res.data);
-
-    const orderId = res.data.order_id;
-    const amountInPaise = res.data.amount;
-
-    const savedEmail = localStorage.getItem("temp_email") || localStorage.getItem("userEmail");
-
-    // 2. Razorpay Options
-    const options = {
-      key: "rzp_test_Sfhi7kk6ImCyYe", 
-      amount:amountInPaise,
-      currency: "INR",
-      name: "EasyGo Rentals",
-      description: `Booking for ${car.carName}`,
-      order_id: orderId,     
-      handler: function (response: any) {
-        setIsProcessing(false);
-        // Payment success hone par yahan se redirection bhi kar sakte ho
-        toast.success("Booking confirmed successfully.");
-        console.log("Payment ID:", response.razorpay_payment_id);
-      },
-      prefill: {
-        name: localStorage.getItem("userName") || "User", 
-        email: savedEmail,
-        contact:localStorage.getItem("userMobile") || ""
-      },
-      theme: { color: "#f97316" },
-      modal: {
-        ondismiss: function() {
-          setIsProcessing(false);
-        }
-      }
-      
-    };
+    const userId = localStorage.getItem("userId");
     
+    if (!startDate || !endDate) {
+      alert("Bhai, pehle dates toh select kar lo! 🚗");
+      return;
+    }
 
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
+    if (new Date(startDate) >= new Date(endDate)) {
+      alert("End Date hamesha Start Date ke baad honi chahiye!");
+      return;
+    }
 
-  } catch (error) {
-    console.error("Payment Error:", error);
-    alert("Payment start nahi ho paya. Backend check karein.");
-    setIsProcessing(false);
-  }
-};
+    if (!userId || !car) return;
 
+    setIsProcessing(true);
+    try {
+      // Backend ko saara data bhejna (including dynamic dates)
+      const subtotal = Number(car.pricePerDay) * rentalDays;
+      const totalAmount = subtotal + (subtotal * 0.18);
+
+      const res = await axios.post("http://localhost:3006/api/create-order", {
+        amount: Math.round(totalAmount),
+        uid: userId,
+        car_id: carid,
+        start_date: formatDateTimeForDB(startDate),
+        end_date: formatDateTimeForDB(endDate)
+      });
+
+      const options = {
+        key: "rzp_test_Sfhi7kk6ImCyYe",
+        amount: res.data.amount,
+        currency: "INR",
+        name: "EasyGo Rentals",
+        description: `Booking for ${car.carName}`,
+        order_id: res.data.order_id,
+        handler: function (response: any) {
+          setIsProcessing(false);
+          toast.success("Booking confirmed successfully! 🚗");
+          console.log("Payment ID:", response.razorpay_payment_id);
+          window.location.href = "/"; 
+        },
+        prefill: {
+          name: localStorage.getItem("userName") || "User",
+          email: localStorage.getItem("userEmail") || "",
+          contact: localStorage.getItem("userMobile") || "",
+        },
+        theme: { color: "#f97316" },
+        modal: { ondismiss: () => setIsProcessing(false) },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Payment Error:", error);
+      alert("Payment failed to start.");
+      setIsProcessing(false);
+    }
+  };
+
+  if (loading) return <div className="p-10 text-center">Loading details...</div>;
+  if (!car) return <div className="p-10 text-center text-red-500">Car not found!</div>;
+
+  const subtotal = Number(car.pricePerDay) * rentalDays;
+  const tax = subtotal * 0.18;
+  const total = subtotal + tax;
+  
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -246,10 +318,13 @@ console.log("Sending to backend:", { total, userId, carid });
                   </div>
                   <div className="bg-blue-50 px-3 py-1 rounded-full">
                     <span className="text-blue-600 font-semibold">
-                      ⭐{calculateAvg()}
+                      ⭐
+                      {ratingData && ratingData.avgRating > 0
+                        ? Number(ratingData.avgRating).toFixed(1)
+                        : "No Ratings"}
                     </span>
                     <span className="text-xs text-gray-400">
-                      ({ratingData.length} reviews)
+                      ({ratingData?.totalReviews ?? 0} reviews)
                     </span>
                   </div>
                 </div>
@@ -350,8 +425,10 @@ console.log("Sending to backend:", { total, userId, carid });
                   </label>
                   <input
                     type="datetime-local"
-                    value={pickupDate}
-                    onChange={handlePickupDateChange}
+                    value={startDate}
+                    // onChange={handlePickupDateChange}
+                    onChange={(e) => { setStartDate(e.target.value); 
+                    handleDateChange(e.target.value, endDate); }}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                     required
                   />
@@ -362,19 +439,17 @@ console.log("Sending to backend:", { total, userId, carid });
                   </label>
                   <input
                     type="datetime-local"
-                    value={returnDate}
-                    onChange={handleReturnDateChange}
+                    value={endDate}
+                    onChange={(e) => { setEndDate(e.target.value); 
+                    handleDateChange(startDate, e.target.value); }}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                     required
                   />
                 </div>
               </div>
               {rentalDays > 0 && (
-                <div className="mt-4 text-sm text-gray-600">
-                  Total rental period:{" "}
-                  <span className="font-semibold text-gray-900">
-                    {rentalDays} day{rentalDays !== 1 ? "s" : ""}
-                  </span>
+                <div className="mt-4 text-sm text-gray-900">
+                  Total rental period: <span className="font-bold">{rentalDays} days</span>
                 </div>
               )}
             </div>
@@ -405,52 +480,24 @@ console.log("Sending to backend:", { total, userId, carid });
                 </div>
               </div>
 
-              {/* Payment Options */}
-              {/* <div className="mt-6">
-                <h4 className="font-semibold text-gray-900 mb-3">
-                  Select Payment Method
-                </h4>
-                <div className="space-y-2">
-                  {paymentOptions.map((option) => (
-                    <label
-                      key={option.id}
-                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                        selectedPayment === option.id
-                          ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="payment"
-                        value={option.id}
-                        checked={selectedPayment === option.id}
-                        onChange={(e) => setSelectedPayment(e.target.value)}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-lg">{option.icon}</span>
-                      <span className="text-gray-700">{option.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div> */}
-
               {/* Book Now Button */}
               <button
-                onClick={() => {handlePayment()}}
+                onClick={() => {
+                  handlePayment();
+                }}
                 disabled={
                   isProcessing ||
-                  !pickupDate ||
-                  !returnDate ||
+                  !startDate ||
+                  !endDate ||
                   car.status !== "AVAILABLE" ||
-                  new Date(returnDate) <= new Date(pickupDate)
+                  new Date(endDate) <= new Date(startDate)
                 }
                 className={`cursor-pointer w-full mt-6 py-4 px-4 rounded-xl font-bold text-white transition-all duration-300 transform active:scale-95 ${
                   isProcessing ||
-                  !pickupDate ||
-                  !returnDate ||
+                  !startDate ||
+                  !endDate ||
                   car.status !== "AVAILABLE" ||
-                  new Date(returnDate) <= new Date(pickupDate)
+                  new Date(endDate) <= new Date(startDate)
                     ? "bg-gray-400 cursor-not-allowed grayscale"
                     : "bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-orange-500/30"
                 }`}
@@ -483,9 +530,9 @@ console.log("Sending to backend:", { total, userId, carid });
                   <>
                     {car.status !== "AVAILABLE"
                       ? "Car Currently Unavailable"
-                      : !pickupDate || !returnDate
+                      : !startDate || !endDate
                         ? "Select Dates to Continue"
-                        : new Date(returnDate) <= new Date(pickupDate)
+                        : new Date(endDate) <= new Date(startDate)
                           ? "Invalid Return Date ⚠️"
                           : "Confirm & Book Now"}
                   </>

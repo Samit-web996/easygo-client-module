@@ -34,7 +34,8 @@ export default function CarDetails() {
   const carid = params?.carid as string;
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [ratingData, setRatingData] = useState<RatingItem[]>([]);
+  const [ratingData, setRatingData] = useState<{avgRating: number, totalReviews: number} | null>(null);
+  // const [ratingData, setRatingData] = useState<RatingItem[]>([]);
   // const [open, setOpen] = useState<boolean>(false);
   const [showLogin, setShowLogin] = useState<boolean>(false);
   const [showKyc, setShowKyc] = useState<boolean>(false);
@@ -64,16 +65,17 @@ export default function CarDetails() {
         setRatingData(res.data);
       } catch (err) {
         console.log("error:", err);
+        setRatingData({ avgRating: 0, totalReviews: 0 });
       }
     };
     if (carid) getRating();
   }, [carid]);
 
-  const calculateAvg = () => {
-    if (ratingData.length === 0) return "No Ratings";
-    const sum = ratingData.reduce((acc, curr) => acc + curr.rating, 0);
-    return (sum / ratingData.length).toFixed(1);
-  };
+  // const calculateAvg = () => {
+  //   if (ratingData.length === 0) return "No Ratings";
+  //   const sum = ratingData.reduce((acc, curr) => acc + curr.rating, 0);
+  //   return (sum / ratingData.length).toFixed(1);
+  // };
 
   if (loading)
     return (
@@ -174,10 +176,12 @@ if (car.status === "UNAVAILABLE") {
             <div className="flex items-center justify-center gap-1 mt-1">
               <span className="text-yellow-500 text-lg">⭐</span>
               <span className="font-bold text-gray-700 text-xl">
-                {calculateAvg()}
+                {ratingData && ratingData.avgRating > 0
+      ? Number(ratingData.avgRating).toFixed(1)
+      : "No Ratings"}
               </span>
               <span className="text-xs text-gray-400">
-                ({ratingData.length} reviews)
+                ({ratingData?.totalReviews ?? 0} reviews)
               </span>
             </div>
           </div>
