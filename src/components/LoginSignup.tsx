@@ -362,7 +362,7 @@ const verifyOTP = async () => {
           </div>
         </motion.div>
 
-        <div id="recaptcha" className="fixed bottom-0"></div>
+        <div id="recaptcha" className="my-4 flex justify-center min-h-78px"></div>
         <ToastContainer theme="colored" />
       </div>
     </AnimatePresence>
