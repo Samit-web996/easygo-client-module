@@ -11,22 +11,25 @@ const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
 
-useEffect(() => {
-  if (typeof window !== "undefined") {
-    const savedName = localStorage.getItem("userName");
-    if (savedName) {
-      setTimeout(() => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedName = localStorage.getItem("userName");
+      if (savedName) {
         setUserName(savedName);
-      }, 0);
+      }
     }
-  }
-}, []);
+  }, []);
 
   return (
     <>
       <nav className="bg-white text-black shadow-sm border-b border-gray-200 sticky top-0 z-50 shrink-0 w-full font-sans">
-        <div className="w-full h-16 flex items-center justify-between px-4 sm:px-8 box-sizing-border-box">
+        {/* Adjusted padding wrapper to perfectly match the 32px edge margin standard */}
+        <div 
+          className="w-full h-16 flex items-center justify-between"
+          style={{ padding: "0 32px", boxSizing: "border-box" }}
+        >
           
+          {/* LEFT INTERFACE SECTION */}
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <button
               suppressHydrationWarning={true}
@@ -44,6 +47,7 @@ useEffect(() => {
             </Link>
           </div>
 
+          {/* RIGHT AUTH CONTROL SECTION */}
           <div className="flex items-center gap-2 sm:gap-4 max-w-[60%] justify-end">
             {userName ? (
               <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
@@ -53,6 +57,7 @@ useEffect(() => {
                     {userName}
                   </span>
                 </div>
+                {/* User Avatar - Premium Unified Look */}
                 <div 
                   className="w-8 h-8 sm:w-9 sm:h-9 rounded-full text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-sm shrink-0"
                   style={{ backgroundColor: "#f97316" }}
@@ -61,10 +66,11 @@ useEffect(() => {
                 </div>
               </div>
             ) : (
+              /* Fixed: Removed smPadding from style object and handled strictly via native Tailwind responsive utility classes */
               <button
                 suppressHydrationWarning={true}
                 onClick={() => setOpen(true)}
-                className="cursor-pointer font-bold text-[10px] sm:text-xs tracking-wider uppercase border-2 border-[#f97316] text-[#f97316] hover:bg-[#f97316] hover:text-white transition-all duration-200 rounded-xl whitespace-nowrap px-4 py-2 sm:px-6"
+                className="cursor-pointer font-bold text-[10px] sm:text-xs tracking-wider uppercase border-2 border-[#f97316] text-[#f97316] hover:bg-[#f97316] hover:text-white transition-all duration-200 rounded-xl whitespace-nowrap px-4 py-2 sm:px-6 sm:py-2.5"
               >
                 Login/Signup
               </button>

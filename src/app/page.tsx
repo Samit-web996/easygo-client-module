@@ -1,6 +1,6 @@
 import React from 'react'
 // import applyBooking from '@/components/home/applyBooking'
-import Home from '@/pages/Home'
+import Home from '@/_pages/Home'
 
 function page() {
   return (
