@@ -21,7 +21,7 @@ interface LoginModalProps {
 
 declare global {
   interface Window {
-    recaptchaVerifier: RecaptchaVerifier;
+    recaptchaVerifier: RecaptchaVerifier | null; 
   }
 }
 
@@ -95,7 +95,7 @@ const sendOTPRequest = async () => {
     const result = await signInWithPhoneNumber(
       auth,
       "+91" + mobile,
-      window.recaptchaVerifier,
+      window.recaptchaVerifier!,
     );
     setConfirmation(result);
     
@@ -104,6 +104,12 @@ const sendOTPRequest = async () => {
   } catch (error) {
     console.error("Firebase Auth Error:", error);
     toast.error("Error sending OTP. Try again.");
+    
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
+    }
+    
     setStep(1);
   }
 };

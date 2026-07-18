@@ -11,7 +11,7 @@ import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import LogoutIcon from "@mui/icons-material/Logout";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogActions,
@@ -32,7 +32,7 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { text: "Car Rental", icon: <DirectionsCarIcon />, path: "/car-rental" },
+  { text: "Car Rental", icon: <DirectionsCarIcon />, path: "/" },
   { text: "My Trips", icon: <TravelExploreIcon />, path: "/my-trips" },
   { text: "Favourite Cars", icon: <FavoriteIcon />, path: "/favourites" },
   { text: "EasyGo Host", icon: <StorefrontIcon />, path: "/easygo-host" },
@@ -40,64 +40,60 @@ const menuItems: MenuItem[] = [
 
 const TemporaryDrawer: React.FC<DrawerProps> = ({ open, setOpen }) => {
   const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false);
+  const router = useRouter();
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
   };
 
+  const handleNavigation = (path: string) => {
+    setOpen(false); 
+    router.push(path); 
+  };
+
   const handleLogoutClick = () => {
-    setLogoutDialogOpen(true); // Confirmation box dikhao
+    setLogoutDialogOpen(true); 
   };
 
   const confirmLogout = () => {
     localStorage.clear();
     setLogoutDialogOpen(false);
-    setOpen(false); // Sidebar band
-    window.location.reload(); // Page refresh
+    setOpen(false); 
+    window.location.reload(); 
   };
 
   return (
     <>
-    <Drawer
-      open={open}
-      onClose={toggleDrawer(false)}
-      transitionDuration={400}
-      PaperProps={{
-        sx: {
-          width: 260,
-          borderTopRightRadius: "16px",
-          borderBottomRightRadius: "16px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-        },
-      }}
-    >
-      <Box
-        sx={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          bgcolor: "#fff",
+      <Drawer
+        open={open}
+        onClose={toggleDrawer(false)}
+        transitionDuration={400}
+        PaperProps={{
+          sx: {
+            width: 260,
+            borderTopRightRadius: "16px",
+            borderBottomRightRadius: "16px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+          },
         }}
       >
-        {/* Top Logo */}
-        <Box sx={{ p: 2, borderBottom: "1px solid #eee" }}>
-          <h2 style={{ color: "#f97316", fontWeight: "bold" }}>EasyGo</h2>
-        </Box>
+        <Box
+          sx={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            bgcolor: "#fff",
+          }}
+        >
+          <Box sx={{ p: 2, borderBottom: "1px solid #eee" }}>
+            <h2 style={{ color: "#f97316", fontWeight: "bold" }}>EasyGo</h2>
+          </Box>
 
-        {/* 🔥 Menu */}
-        <List>
-          {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding>
-              <Link
-                href={item.path}
-                style={{
-                  width: "100%",
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
-              >
+          <List>
+            {menuItems.map((item) => (
+              <ListItem key={item.text} disablePadding>
                 <ListItemButton
-                  onClick={() => setOpen(false)}
+                  onClick={() => handleNavigation(item.path)}
                   sx={{
                     mx: 1,
                     borderRadius: "10px",
@@ -118,39 +114,37 @@ const TemporaryDrawer: React.FC<DrawerProps> = ({ open, setOpen }) => {
                     }}
                   />
                 </ListItemButton>
-              </Link>
-            </ListItem>
-          ))}
-        </List>
+              </ListItem>
+            ))}
+          </List>
 
-        <Box sx={{ p: 1, borderTop: "1px solid #eee" }}>
-          <ListItemButton
-            onClick={handleLogoutClick} // 👈 Dialog open karega
-            sx={{
-              mx: 1,
-              borderRadius: "10px",
-              color: "#ef4444",
-              "&:hover": { backgroundColor: "#fef2f2" },
-            }}
-          >
-            <ListItemIcon sx={{ color: "#ef4444", minWidth: 35 }}>
-              <LogoutIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Logout"
-              primaryTypographyProps={{ fontSize: "14px", fontWeight: 600 }}
-            />
-          </ListItemButton>
+          <Box sx={{ p: 1, borderTop: "1px solid #eee" }}>
+            <ListItemButton
+              onClick={handleLogoutClick}
+              sx={{
+                mx: 1,
+                borderRadius: "10px",
+                color: "#ef4444",
+                "&:hover": { backgroundColor: "#fef2f2" },
+              }}
+            >
+              <ListItemIcon sx={{ color: "#ef4444", minWidth: 35 }}>
+                <LogoutIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Logout"
+                primaryTypographyProps={{ fontSize: "14px", fontWeight: 600 }}
+              />
+            </ListItemButton>
+          </Box>
+
+          <Box sx={{ p: 2, borderTop: "1px solid #eee", mt: "auto" }}>
+            <p style={{ fontSize: "12px", color: "#999" }}>© 2026 EasyGo</p>
+          </Box>
         </Box>
+      </Drawer>
 
-        {/* Footer */}
-        <Box sx={{ p: 2, borderTop: "1px solid #eee", mt: "auto" }}>
-          <p style={{ fontSize: "12px", color: "#999" }}>© 2026 EasyGo</p>
-        </Box>
-      </Box>
-    </Drawer>
-
-    <Dialog
+      <Dialog
         open={logoutDialogOpen}
         onClose={() => setLogoutDialogOpen(false)}
         aria-labelledby="logout-dialog-title"
@@ -180,7 +174,7 @@ const TemporaryDrawer: React.FC<DrawerProps> = ({ open, setOpen }) => {
           </Button>
         </DialogActions>
       </Dialog>
-      </>
+    </>
   );
 };
 
