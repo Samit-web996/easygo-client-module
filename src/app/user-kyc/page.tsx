@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import {toast } from "react-toastify";
+import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import axios from "axios";
+import API from "@/api";
 
-// 1. Define Interface for Form State
 interface KycFormData {
   uid: string;
-  // full_name: string;
-  // email_id: string;
   mobile_no: string;
   aadhar_no: string;
   current_address: string;
@@ -17,7 +14,6 @@ interface KycFormData {
   user_photo: File | null;
 }
 
-// 2. Define Props for the Modal
 interface KycFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,10 +22,7 @@ interface KycFormProps {
 
 export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
   const [form, setForm] = useState<KycFormData>({
-    uid:
-      typeof window !== "undefined" ? localStorage.getItem("userId") || "" : "",
-    // full_name: "",
-    // email_id: "",
+    uid: typeof window !== "undefined" ? localStorage.getItem("userId") || "" : "",
     mobile_no: "",
     aadhar_no: "",
     license_no: "",
@@ -41,19 +34,23 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
     if (isOpen) {
       const storedUid = localStorage.getItem("userId") || "";
       const storeMobile = localStorage.getItem("userMobile") || "";
-      setForm((prev) => ({ ...prev, uid: storedUid, mobile_no: storeMobile }));
+      setTimeout(() => {
+        setForm((prev) => ({ 
+          ...prev, 
+          uid: storedUid, 
+          mobile_no: storeMobile 
+        }));
+      }, 0);
     }
   }, [isOpen]);
 
-  // Handle Text Inputs
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle File Input
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setForm((prev) => ({ ...prev, user_photo: e.target.files![0] }));
@@ -69,25 +66,22 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
 
     try {
       const formData = new FormData();
-      // formData.append("full_name", form.full_name);
-      // formData.append("email_id", form.email_id);
       formData.append("aadhar_no", form.aadhar_no);
       formData.append("license_no", form.license_no);
       formData.append("current_address", form.current_address);
       formData.append("mobile_no", localStorage.getItem("userMobile") || "");
       if (form.user_photo) {
-        // Agar state ke andar 'user_photo' hai
         formData.append("user_photo", form.user_photo);
       } else {
         return toast.error("Please select a photo first!");
       }
 
-      const res = await axios.patch(
-        `http://localhost:3006/user-kyc/${form.uid}`,
+      const res = await API.patch(
+        `/user-kyc/${form.uid}`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
-        },
+        }
       );
 
       if (res.status === 200 || res.data.success) {
@@ -97,11 +91,9 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
           onClose();
         }, 500);
         onClose();
-        // Reset Form
+        
         setForm({
           uid: localStorage.getItem("userId") || "",
-          // full_name: "",
-          // email_id: "",
           mobile_no: localStorage.getItem("userMobile") || "",
           aadhar_no: "",
           license_no: "",
@@ -118,126 +110,123 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="border-20 fixed inset-0 z-[99999] flex items-center justify-center p-4">
-      {/* Modal Container: Screen ke center mein float karega */}
-      <div className="border-20 relative w-full max-w-xl max-h-[90vh] rounded-[32px] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden text-gray-800 animate-in fade-in zoom-in duration-300">
-        {/* Close Button: Top Right corner par stylish wala */}
-        {/* <button 
-          onClick={onClose} 
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-all z-10 p-2 hover:bg-gray-100 rounded-full"
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md transition-all duration-300">
+      
+      <div 
+        className="w-full bg-white flex flex-col overflow-hidden text-gray-800 animate-in fade-in zoom-in-95 duration-200"
+        style={{
+          maxWidth: "540px",
+          maxHeight: "90vh",
+          borderRadius: "24px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          border: "1px solid #e2e8f0"
+        }}
+      >
+        
+        <div 
+          className="border-b border-gray-100 bg-gray-50/60"
+          style={{ padding: "20px 24px" }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button> */}
-
-        {/* HEADER */}
-        <div className="p-6 border-b bg-gray-50/50">
-          <h2 className="text-2xl font-extrabold text-indigo-900">
+          <h2 className="text-xl font-extrabold text-[#0f172a] tracking-tight">
             Complete Your KYC
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs font-medium text-gray-500 mt-1">
             Please provide valid identity documents to proceed with booking.
           </p>
         </div>
 
-        {/* FORM BODY */}
         <form
           onSubmit={handleSubmit}
-          className="p-8 overflow-y-auto space-y-5 custom-scrollbar"
+          className="overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4"
+          style={{ padding: "24px" }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* <Input
-              label="Full Name"
-              name="full_name"
-              value={form.full_name}
-              onChange={handleChange}
-              placeholder="Sunny Raj"
-            />
-            <Input
-              label="Email Address"
-              name="email_id"
-              type="email"
-              value={form.email_id}
-              onChange={handleChange}
-              placeholder="sunny@example.com"
-            /> */}
-            <Input
-              label="Mobile Number"
-              name="mobile_no"
-              type="text"
-              value={form.mobile_no}
-              onChange={() => {}}
-              disabled={true}
-              placeholder="Mobile Number"
-            />
-            <Input
-              label="Aadhar Number"
-              name="aadhar_no"
-              value={form.aadhar_no}
-              onChange={handleChange}
-              maxLength={12}
-              placeholder="XXXX XXXX XXXX"
-            />
-            <Input
-              label="License Number "
-              name="license_no"
-              value={form.license_no}
-              onChange={handleChange}
-              maxLength={12}
-              placeholder="XXXX XXXX XXXX"
-            />
-            {/* <Input label="Contact Number" name="mobile" value={form.mobile} onChange={handleChange} maxLength={10} placeholder="9876543210" /> */}
+          <Input
+            label="Mobile Number"
+            name="mobile_no"
+            type="text"
+            value={form.mobile_no}
+            disabled={true}
+            placeholder="Mobile Number"
+          />
+          <Input
+            label="Aadhar Number"
+            name="aadhar_no"
+            value={form.aadhar_no}
+            onChange={handleChange}
+            maxLength={12}
+            placeholder="XXXX XXXX XXXX"
+          />
+          <Input
+            label="License Number"
+            name="license_no"
+            value={form.license_no}
+            onChange={handleChange}
+            maxLength={15}
+            placeholder="Enter license number"
+          />
 
-            <div className="md:col-span-2">
-              <label className="text-sm font-bold text-gray-700 mb-1.5 block uppercase tracking-wider">
-                Current Address
-              </label>
-              <textarea
-                name="current_address"
-                value={form.current_address}
-                onChange={handleChange}
-                placeholder="Enter your complete address..."
-                className="w-full p-3 border-2 border-gray-100 rounded-xl outline-none focus:border-indigo-500 transition-all bg-gray-50/50"
-                rows={2}
-              />
-            </div>
-
-            <div className="md:col-span-2 bg-indigo-50/50 p-5 rounded-2xl border-2 border-dashed border-indigo-200">
-              <label className="text-sm font-bold text-indigo-800 block mb-3 uppercase tracking-wider">
-                Profile Picture / Identity Photo
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 file:cursor-pointer"
-              />
-            </div>
+          <div className="sm:col-span-2 flex flex-col gap-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Current Address
+            </label>
+            <textarea
+              name="current_address"
+              value={form.current_address}
+              onChange={handleChange}
+              placeholder="Enter your complete address..."
+              className="w-full bg-gray-50/50 border border-gray-200 text-gray-800 text-sm rounded-xl outline-none transition-all focus:border-[#f97316] focus:ring-4 focus:ring-orange-500/10 resize-none"
+              style={{ padding: "12px 16px" }}
+              rows={2}
+              required
+            />
           </div>
 
-          {/* FOOTER ACTIONS */}
-          <div className="flex justify-end items-center gap-4 pt-4 mt-4 border-t border-gray-100">
+          <div 
+            className="sm:col-span-2 flex flex-col gap-2 rounded-xl"
+            style={{ 
+              padding: "16px",
+              backgroundColor: "rgba(249, 115, 22, 0.03)", 
+              border: "1px dashed rgba(249, 115, 22, 0.25)" 
+            }}
+          >
+            <label className="text-xs font-bold uppercase tracking-wider text-[#ea580c]">
+              Profile Picture / Identity Photo
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#0f172a] file:text-white hover:file:bg-[#0f172a]/90 file:cursor-pointer transition-all"
+            />
+          </div>
+
+          <div 
+            className="sm:col-span-2 flex justify-between items-center" 
+            style={{ marginTop: "12px", paddingTop: "16px", borderTop: "1px solid #f1f5f9" }}
+          >
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 text-sm font-bold text-gray-400  hover:text-gray-600 uppercase tracking-widest transition-all"
+              className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors tracking-wider uppercase cursor-pointer"
+              style={{ padding: "10px 0" }}
             >
               Discard
             </button>
+
             <button
               type="submit"
-              className="bg-indigo-600 text-white px-10 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 active:scale-95 transition-all"
+              className="bg-[#f97316] hover:bg-[#ea580c] text-white font-bold text-xs tracking-wider uppercase rounded-xl active:scale-[0.97] transition-all duration-150 cursor-pointer text-center shadow-md shadow-orange-500/10"
+              style={{ padding: "12px 32px" }}
             >
               Submit KYC
             </button>
           </div>
         </form>
       </div>
-
     </div>
   );
 }
 
-// 3. Define Props for Input Component
 interface InputProps {
   label: string;
   name?: string;
@@ -257,10 +246,11 @@ function Input({
   type = "text",
   maxLength,
   placeholder,
+  disabled
 }: InputProps) {
   return (
-    <div className="flex flex-col gap-1.5 w-full">
-      <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+      <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
         {label}
       </label>
       <input
@@ -270,8 +260,16 @@ function Input({
         onChange={onChange}
         maxLength={maxLength}
         placeholder={placeholder}
-        className="w-full p-3 border-2 border-gray-100 rounded-xl outline-none focus:border-indigo-500 transition-all bg-gray-50/50 text-gray-800 placeholder:text-gray-300"
-        required
+        disabled={disabled}
+        className="w-full text-sm rounded-xl outline-none transition-all"
+        style={{
+          padding: "12px 16px",
+          backgroundColor: disabled ? "#f1f5f9" : "#f8fafc",
+          border: "1px solid #e2e8f0",
+          color: disabled ? "#94a3b8" : "#0f172a",
+          cursor: disabled ? "not-allowed" : "text"
+        }}
+        required={!disabled}
       />
     </div>
   );

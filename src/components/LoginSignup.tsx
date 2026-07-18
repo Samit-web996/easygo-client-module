@@ -11,7 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, X } from "lucide-react";
-import axios from "axios";
+import API from "@/api";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -48,30 +48,25 @@ export default function LoginModal({
     }
   };
 
-  // Step 1 -> Step 2 ya seedha Step 3 (Check if User is New)
 const handleMobileSubmit = async () => {
   if (mobile.length !== 10) return;
   setLoading(true);
   try {
-    const res = await axios.post("http://localhost:3006/api/check-user", {
+    const res = await API.post("/api/check-user", {
       mobile: "+91" + mobile,
     });
 
     if (res.data.exists) {
-      // --- CASE 1: User Pehle se hai ---
-      const user = res.data.user; // res.data.users ki jagah user (check your backend)
+      const user = res.data.user;
 
-      // DB se data lekar temp storage mein daalo
       localStorage.setItem("temp_name", user.name || user.full_name || "");
       localStorage.setItem("temp_email", user.email_id || user.email || "");
       
       console.log("Existing user found, sending OTP...");
       
-      // Seedha OTP bhej ke Step 3 par jump karo
       await sendOTPRequest(); 
     } else {
-      // --- CASE 2: User Naya hai ---
-      setStep(2); // Name/Email form dikhao
+      setStep(2);
     }
   } catch (error: unknown) {
     console.error("Check user error:", error);
@@ -81,7 +76,6 @@ const handleMobileSubmit = async () => {
   }
 };
 
-// Step 2 -> Step 3 (New User Details save & Send OTP)
 const handleDetailsSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!name.trim()) {
@@ -89,11 +83,9 @@ const handleDetailsSubmit = async (e: React.FormEvent) => {
     return;
   }
   
-  // User ne jo form bhara hai use save karo
   localStorage.setItem("temp_name", name);
   localStorage.setItem("temp_email", email);
 
-  // Details mil gayi, ab OTP bhejo aur Step 3 par jao
   await sendOTPRequest();
 };
 
@@ -107,13 +99,11 @@ const sendOTPRequest = async () => {
     );
     setConfirmation(result);
     
-    // OTP bhejte hi Step 3 (OTP Verification) par bhej do
     setStep(3); 
     toast.success("OTP sent successfully");
   } catch (error) {
     console.error("Firebase Auth Error:", error);
     toast.error("Error sending OTP. Try again.");
-    // Agar error aaye toh wapas step 1 par bhej sakte ho
     setStep(1);
   }
 };
@@ -125,7 +115,6 @@ const verifyOTP = async () => {
     const result = await confirmation.confirm(otp);
     const firebaseUser = result.user;
 
-    // LocalStorage se data uthao (Chahe DB se aaya ho ya Form se)
     const finalName = localStorage.getItem("temp_name") || "User";
     const finalEmail = localStorage.getItem("temp_email") || "";
 
@@ -136,8 +125,8 @@ const verifyOTP = async () => {
       mobile_no: "+91" + mobile,
     };
 
-    const dbRes = await axios.post(
-      "http://localhost:3006/api/auth/login",
+    const dbRes = await API.post(
+      "/api/auth/login",
       userData,
     );
 
@@ -157,7 +146,7 @@ const verifyOTP = async () => {
     }
   } catch (error) {
     console.error("Verification Error:", error);
-    toast.error("Invalid OTP or Database Error");
+    toast.error("Invalid OTP");
   }
 };
 

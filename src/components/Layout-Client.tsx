@@ -22,7 +22,6 @@ export default function LayoutClient({
       <Navbar/>
 
       <div style={{ display: "flex" }}>
-        {/* Sidebar bhi yaha control karega */}
         {children}
         <ToastContainer position="top-center" autoClose={2000} />
       </div>

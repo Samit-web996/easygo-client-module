@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "@/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
@@ -13,7 +13,7 @@ interface Location {
 
 const LocationIcon = () => (
   <svg
-    className="w-5 h-5 text-gray-400"
+    className="w-5 h-5 text-gray-400 shrink-0"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -38,20 +38,8 @@ function ApplyBooking() {
   const [activeTab, setActiveTab] = React.useState("Car Rental");
   const [city, setCity] = React.useState("");
   const [results, setResults] = React.useState<Location[]>([]);
-  const [availableCities, setAvailableCities] = React.useState<Location[]>([]); // DB se aane wali cities
+  const [availableCities, setAvailableCities] = React.useState<Location[]>([]); 
   const [selectedLocId, setSelectedLocId] = useState<number | null>(null);
-
-  // React.useEffect(() => {
-  //   const fetchCities = async () => {
-  //     try {
-  //       const res = await axios.get("http://localhost:3006/seach-city"); // Aapka locations API
-  //       setAvailableCities(res.data); // Maan lo backend [{loc_id:1, city_name:'Bhopal'}, ...] bhej raha hai
-  //     } catch (err) {
-  //       console.error("Cities load nahi ho payi", err);
-  //     }
-  //   };
-  //   fetchCities();
-  // }, []);
 
   const handleCitySearch = async (value: string) => {
     setCity(value);
@@ -61,67 +49,79 @@ function ApplyBooking() {
       setResults([]);
       return;
     }
+    
     const filtered = availableCities.filter((item) =>
-      item.city_name.toLowerCase().includes(value.toLowerCase()),
+      item.city_name.toLowerCase().includes(value.toLowerCase())
     );
     setResults(filtered);
   };
 
-const onSearch = () => {
-  if (selectedLocId) {
-    // Is path ko apne folder name (search-results) se match karein
-    router.push(`/city-search?loc_id=${selectedLocId}`); 
-  } else {
-    toast.error('Please select a city first!')
-  }
-};
+  const onSearch = () => {
+    if (selectedLocId) {
+      router.push(`/city-search?loc_id=${selectedLocId}`);
+    } else {
+      toast.error("Please select a city first!");
+    }
+  };
 
-  useEffect (() => {
+  useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await axios.get('http://localhost:3006/api/locations');
-        setAvailableCities(res.data)
+        const res = await API.get("/api/locations");
+        setAvailableCities(res.data);
       } catch (err) {
-        console.error("Cities load nahi ho payi", err)
+        console.error("Cities not loading", err);
       }
     };
     fetchCities();
-  }, [])
+  }, []);
 
   return (
-   <div className="bg-gray-100 py-5 md:px-10 mt-8 rounded-[20px] md:mx-5 border border-gray-200 shadow-sm ">
-      <div className="flex flex-col lg:flex-row items-start justify-between max-w-1400px mx-auto">
-        <div className="w-full lg:w-[65%] flex flex-col pt-4">
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] mb-8">
+    <div 
+      className="w-full font-sans text-gray-800 relative"
+      style={{ 
+        backgroundColor: "#f8fafc", 
+        padding: "40px 32px", 
+        boxSizing: "border-box",
+        borderRadius: "24px",
+        border: "1px solid #e2e8f0"
+      }}
+    >
+      {/* Changed lg:flex-row to xl:flex-row and added items-start with flex-wrap logic */}
+      <div className="w-full flex flex-col xl:flex-row items-start justify-between gap-8 flex-wrap xl:flex-nowrap">
+        
+        {/* LEFT SEARCH BAR CONTROL MODULE PANEL */}
+        <div className="w-full xl:w-[60%] flex flex-col grow shrink-0 min-w-[280px]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#0f172a] leading-[1.1] mb-8 tracking-tight text-center md:text-left">
             Book Your Drive, <br />
-            <span className="text-orange-600">Start Your Story.</span>
+            <span className="text-[#f97316]">Start Your Story.</span>
           </h1>
 
-          {/* ICON TABS */}
-          <div className="flex gap-3 mb-8 flex-wrap">
+          {/* Tab Button Array */}
+          <div className="flex gap-2.5 mb-6 flex-wrap justify-center md:justify-start">
             {["Car Rental", "Car + Driver", "Bike Rental", "Bike + Driver"].map((item, i) => (
               <button
-              suppressHydrationWarning={true}
+                suppressHydrationWarning={true}
                 key={i}
                 onClick={() => setActiveTab(item)}
-                className={`cursor-pointer px-6 py-2.5 rounded-full text-sm font-bold transition-all
-                  ${activeTab === item ? "bg-orange-500 text-white shadow-lg" : "bg-white text-gray-700 hover:bg-gray-200"}`}
+                className="px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer"
+                style={{
+                  backgroundColor: activeTab === item ? "#f97316" : "#ffffff",
+                  color: activeTab === item ? "#ffffff" : "#475569",
+                  border: activeTab === item ? "1px solid #f97316" : "1px solid #e2e8f0",
+                  boxShadow: activeTab === item ? "0 4px 12px rgba(249, 115, 22, 0.25)" : "none"
+                }}
               >
                 {item}
               </button>
             ))}
           </div>
 
-          {/* <div className="flex gap-6 mb-6 text-sm text-gray-500 font-semibold">
-            <span>Same drop-off ▼</span>
-            <span>Driver’s age: 25-65 ▼</span>
-          </div> */}
-
-          
-
-          {/* SEARCH BOX */}
-          <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row items-stretch w-full border border-gray-100 relative z-20">
-            <div className="flex-[1.5] relative border-b md:border-b-0 md:border-r border-gray-100 flex items-center px-4 ">
+          {/* Unified Modular Search Panel Box */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg shadow-slate-100 flex flex-col md:flex-row items-stretch w-full relative z-30">
+            
+            {/* Input City Box */}
+            <div className="flex-[2] relative border-b md:border-b-0 md:border-r border-gray-100 flex items-center px-4 bg-white rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl">
               <LocationIcon />
               <input
                 type="text"
@@ -129,105 +129,95 @@ const onSearch = () => {
                 value={city}
                 onChange={(e) => handleCitySearch(e.target.value)}
                 placeholder="Enter city (e.g. Bhopal)"
-                className="w-full py-5 px-3 outline-none font-semibold text-gray-800 bg-transparent"
+                className="w-full px-3 outline-none font-semibold text-gray-800 bg-transparent text-sm sm:text-base"
+                style={{ height: "60px" }}
               />
 
-              {/* Suggestions Dropdown */}
               {results.length > 0 && (
-                <div className="absolute left-0 right-0 top-full bg-white shadow-2xl rounded-b-xl border border-gray-200 mt-2 z-50">
+                <div 
+                  className="absolute left-0 right-0 top-full bg-white shadow-2xl border border-gray-200 mt-2 rounded-xl overflow-hidden"
+                  style={{ zIndex: 999 }}
+                >
                   {results.map((item, i) => (
                     <div
                       key={i}
                       onClick={() => {
-                        setCity(item.city_name);
+                        setCity(`${item.city_name}, ${item.state_name}`);
                         setSelectedLocId(item.loc_id);
                         setResults([]);
                       }}
-                      className="p-4 hover:bg-orange-50 cursor-pointer border-b last:border-0 text-sm text-black font-medium transition-colors"
+                      className="p-4 hover:bg-orange-50 cursor-pointer border-b last:border-0 text-xs sm:text-sm text-[#0f172a] font-bold transition-colors"
                     >
-                      {item.city_name}, {item.state_name}
+                      📍 {item.city_name}, {item.state_name}
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Date/Time Inputs */}
-            <div className="flex-1 border-r border-gray-100 flex items-center px-2">
-              <input type="date" className="w-full px-2 outline-none text-sm text-gray-500" />
+            <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100 flex items-center bg-white px-2">
+              <input type="date" className="w-full p-3 outline-none text-xs font-medium text-gray-600 bg-transparent" />
             </div>
-            <div className="flex-1 border-r border-gray-100 flex items-center">
-              <input type="time" className="w-full px-2 outline-none text-sm text-gray-500" />
+            <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100 flex items-center bg-white px-2">
+              <input type="time" className="w-full p-3 outline-none text-xs font-medium text-gray-600 bg-transparent" />
             </div>
-            <div className="flex-1 border-r border-gray-100 flex items-center">
-              <input type="date" className="w-full px-2 outline-none text-sm text-gray-500" />
+            <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100 flex items-center bg-white px-2">
+              <input type="date" className="w-full p-3 outline-none text-xs font-medium text-gray-600 bg-transparent" />
             </div>
-            <div className="flex-1 flex items-center">
-              <input type="time" className="w-full px-2 outline-none text-sm text-gray-500" />
+            <div className="flex-1 border-b md:border-b-0 flex items-center bg-white px-2">
+              <input type="time" className="w-full p-3 outline-none text-xs font-medium text-gray-600 bg-transparent" />
             </div>
 
+            {/* Core Action CTA Trigger Button */}
             <button
               onClick={onSearch}
               suppressHydrationWarning={true}
-              className="cursor-pointer bg-orange-500 text-white px-10 font-bold hover:bg-orange-600 transition md:rounded-r-2xl"
+              className="bg-[#f97316] hover:bg-[#ea580c] text-white font-bold text-xs tracking-wider uppercase rounded-b-2xl md:rounded-bl-none md:rounded-r-2xl cursor-pointer transition-all w-full md:w-auto text-center shrink-0"
+              style={{ padding: "16px 36px" }}
             >
               Search
             </button>
           </div>
 
-          {/* <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 font-medium">
-            <input type="checkbox" id="suv" className="w-4 h-4 accent-orange-500" />
-            <label htmlFor="suv">SUVs only</label>
-          </div> */}
-
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-4 md:gap-8 max-w-4xl">
-  {/* Feature 1 */}
-  <div className="flex items-start gap-3">
-    <div className="p-2 bg-orange-100 rounded-lg text-orange-600 shrink-0">
-      {/* Users / Trust Icon */}
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    </div>
-    <div>
-      <h3 className="font-bold text-gray-900 text-base md:text-lg">Trusted by 5M drivers</h3>
-      <p className="text-gray-600 text-sm mt-0.5">Excellence is non-negotiable.</p>
-    </div>
-  </div>
-
-  {/* Feature 2 */}
-  <div className="flex items-start gap-3">
-    <div className="p-2 bg-orange-100 rounded-lg text-orange-600 shrink-0">
-      {/* Shield / Protection Icon */}
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
-    </div>
-    <div>
-      <h3 className="font-bold text-gray-900 text-base md:text-lg">Zero Deductible, Zero Worries</h3>
-      <p className="text-gray-600 text-sm mt-0.5">Full coverage, zero hidden cost</p>
-    </div>
-  </div>
-
-  {/* Feature 3 */}
-  <div className="flex items-start gap-3">
-    <div className="p-2 bg-orange-100 rounded-lg text-orange-600 shrink-0">
-      {/* Calendar / Flexibility Icon */}
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m10 16 2 2 4-4"/></svg>
-    </div>
-    <div>
-      <h3 className="font-bold text-gray-900 text-base md:text-lg">Flexible Cancellation</h3>
-      <p className="text-gray-600 text-sm mt-0.5">Book with confidence, cancel for free anytime.</p>
-    </div>
-  </div>
-</div>
-        </div>
-
-        {/* RIGHT SECTION (Images) */}
-        <div className="w-full ml-10 lg:w-[35%] flex justify-end items-start pt-2">
-          <div className="grid grid-cols-2 gap-3 w-full">
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb" className="rounded-3xl h-40 md:h-56 w-full object-cover shadow-md" />
-            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267" className="rounded-3xl h-40 md:h-56 w-full object-cover shadow-md" />
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e" className="rounded-3xl h-40 md:h-56 w-full object-cover shadow-md" />
-            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee" className="rounded-3xl h-40 md:h-56 w-full object-cover shadow-md" />
+          {/* Highlights Badges Row */}
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full text-left">
+            {[
+              { title: "Trusted by 5M drivers", desc: "Excellence is non-negotiable.", icon: "👥" },
+              { title: "Zero Deductible, No Worries", desc: "Full coverage, zero hidden cost", icon: "🛡️" },
+              { title: "Flexible Cancellation", desc: "Book with confidence, cancel for free anytime.", icon: "📅" }
+            ].map((feature, idx) => (
+              <div key={idx} className="flex items-start gap-3 bg-white border border-gray-200/60 p-4 rounded-xl shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center text-sm shrink-0">
+                  {feature.icon}
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#0f172a] text-sm leading-snug">{feature.title}</h3>
+                  <p className="text-gray-400 text-[11px] font-medium mt-0.5 leading-normal">{feature.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+
+        {/* RIGHT SECTION: Fixed Width & Auto Wrap Multi-Image Grid Mosaic Panel */}
+        <div className="w-full xl:w-[36%] flex justify-end items-center shrink-0 min-w-[300px]">
+          <div className="grid grid-cols-2 gap-3.5 w-full">
+            {[
+              "https://res.cloudinary.com/ppdviuw2/image/upload/v1784286308/copy_of_gemini_generated_image_1b37h41b37h41b37_wrnnfb.webp",
+              "https://res.cloudinary.com/ppdviuw2/image/upload/v1784286787/copy_of_gemini_generated_image_ayiniayiniayinia_knldhj.webp",
+              "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+              "https://res.cloudinary.com/ppdviuw2/image/upload/v1784286860/Gemini_Generated_Image_1b37h41b37h41b37_1_whgbn9_acdab3.webp"
+            ].map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt="EasyGo Cars Mosaic Panel Collection"
+                className="rounded-2xl h-36 sm:h-44 w-full object-cover shadow-xs border border-gray-100 transition-transform duration-300 hover:scale-[1.02]"
+              />
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   );
