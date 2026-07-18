@@ -40,13 +40,29 @@ export default function LoginModal({
   );
   const [loading, setLoading] = useState(false);
 
-  const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha", {
-        size: "invisible",
-      });
+const setupRecaptcha = () => {
+  if (window.recaptchaVerifier) {
+    try {
+      window.recaptchaVerifier.clear();
+    } catch (e) {
+      console.log("Verifier clear error:", e);
     }
-  };
+    window.recaptchaVerifier = null;
+  }
+
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha", {
+    size: "invisible",
+    callback: (response: any) => {
+      console.log("reCAPTCHA solved successfully");
+    },
+    "expired-callback": () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    }
+  });
+};
 
 const handleMobileSubmit = async () => {
   if (mobile.length !== 10) return;
@@ -92,6 +108,7 @@ const handleDetailsSubmit = async (e: React.FormEvent) => {
 const sendOTPRequest = async () => {
   try {
     setupRecaptcha();
+    
     const result = await signInWithPhoneNumber(
       auth,
       "+91" + mobile,
@@ -101,15 +118,16 @@ const sendOTPRequest = async () => {
     
     setStep(3); 
     toast.success("OTP sent successfully");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Firebase Auth Error:", error);
     toast.error("Error sending OTP. Try again.");
     
     if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (e) {}
       window.recaptchaVerifier = null;
     }
-    
     setStep(1);
   }
 };
