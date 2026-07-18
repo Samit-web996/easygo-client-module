@@ -110,7 +110,7 @@ export default function KycForm({ isOpen, onClose, onSuccess }: KycFormProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md transition-all duration-300">
+    <div className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md transition-all duration-300">
       
       <div 
         className="w-full bg-white flex flex-col overflow-hidden text-gray-800 animate-in fade-in zoom-in-95 duration-200"

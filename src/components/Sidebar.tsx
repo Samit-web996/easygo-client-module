@@ -49,7 +49,6 @@ const TemporaryDrawer: React.FC<DrawerProps> = ({ open, setOpen }) => {
     setLogoutDialogOpen(true); // Confirmation box dikhao
   };
 
-  // 3. Asli Logout function (Confirm hone par)
   const confirmLogout = () => {
     localStorage.clear();
     setLogoutDialogOpen(false);

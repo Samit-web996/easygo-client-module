@@ -55,14 +55,12 @@ function SearchResultsContent() {
       className="min-h-screen w-full font-sans text-gray-800"
       style={{ 
         backgroundColor: "#f8fafc", 
-        padding: "40px 32px", // Safe padding sync matching other full screen nodes
+        padding: "40px 32px", 
         boxSizing: "border-box" 
       }}
     >
-      {/* Replaced max-w-7xl with w-full to leverage true fluid responsive space */}
       <div className="w-full">
         
-        {/* Dynamic Header */}
         <div className="mb-10 text-center md:text-left">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0f172a] tracking-tight">
             Available <span className="text-[#f97316]">Rides</span>
@@ -72,7 +70,6 @@ function SearchResultsContent() {
           </p>
         </div>
 
-        {/* Responsive Flex Grid Fluid Layer */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-stretch w-full">
           {vehicles.length > 0 ? (
             vehicles.map((car) => (
@@ -147,7 +144,6 @@ function SearchResultsContent() {
               </div>
             ))
           ) : (
-            /* Empty State Container Box - Perfectly formatted full layout wide */
             <div 
               className="col-span-full flex flex-col items-center justify-center text-center border border-gray-200/80 rounded-2xl bg-white shadow-xs w-full"
               style={{ padding: "48px 24px" }}

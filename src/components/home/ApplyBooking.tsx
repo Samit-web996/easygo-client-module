@@ -87,17 +87,14 @@ function ApplyBooking() {
         border: "1px solid #e2e8f0"
       }}
     >
-      {/* Changed lg:flex-row to xl:flex-row and added items-start with flex-wrap logic */}
       <div className="w-full flex flex-col xl:flex-row items-start justify-between gap-8 flex-wrap xl:flex-nowrap">
         
-        {/* LEFT SEARCH BAR CONTROL MODULE PANEL */}
         <div className="w-full xl:w-[60%] flex flex-col grow shrink-0 min-w-[280px]">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#0f172a] leading-[1.1] mb-8 tracking-tight text-center md:text-left">
             Book Your Drive, <br />
             <span className="text-[#f97316]">Start Your Story.</span>
           </h1>
 
-          {/* Tab Button Array */}
           <div className="flex gap-2.5 mb-6 flex-wrap justify-center md:justify-start">
             {["Car Rental", "Car + Driver", "Bike Rental", "Bike + Driver"].map((item, i) => (
               <button
@@ -117,10 +114,8 @@ function ApplyBooking() {
             ))}
           </div>
 
-          {/* Unified Modular Search Panel Box */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-lg shadow-slate-100 flex flex-col md:flex-row items-stretch w-full relative z-30">
             
-            {/* Input City Box */}
             <div className="flex-[2] relative border-b md:border-b-0 md:border-r border-gray-100 flex items-center px-4 bg-white rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl">
               <LocationIcon />
               <input
@@ -168,7 +163,6 @@ function ApplyBooking() {
               <input type="time" className="w-full p-3 outline-none text-xs font-medium text-gray-600 bg-transparent" />
             </div>
 
-            {/* Core Action CTA Trigger Button */}
             <button
               onClick={onSearch}
               suppressHydrationWarning={true}
@@ -179,7 +173,6 @@ function ApplyBooking() {
             </button>
           </div>
 
-          {/* Highlights Badges Row */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full text-left">
             {[
               { title: "Trusted by 5M drivers", desc: "Excellence is non-negotiable.", icon: "👥" },
@@ -199,7 +192,6 @@ function ApplyBooking() {
           </div>
         </div>
 
-        {/* RIGHT SECTION: Fixed Width & Auto Wrap Multi-Image Grid Mosaic Panel */}
         <div className="w-full xl:w-[36%] flex justify-end items-center shrink-0 min-w-[300px]">
           <div className="grid grid-cols-2 gap-3.5 w-full">
             {[

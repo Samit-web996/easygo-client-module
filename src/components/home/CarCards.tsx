@@ -51,10 +51,8 @@ export default function CarRental() {
   }, [filteredData, currentPage]);
 
   return (
-    /* Max-w-7xl removed and padding calibrated to match the full-screen flow */
     <div className="w-full bg-white font-sans selection:bg-orange-100" style={{ padding: "40px 32px", boxSizing: "border-box" }}>
       
-      {/* Header Section - Luxury Typography */}
       <header className="mb-12 relative w-full">
         <div className="absolute -left-4 top-0 w-1 h-12 bg-[#ff5a00] rounded-full hidden md:block"></div>
         <h1 className="text-4xl md:text-6xl font-900 text-[#1a2b3c] tracking-tight leading-none">
@@ -66,7 +64,6 @@ export default function CarRental() {
         </p>
       </header>
 
-      {/* Dates Highlight Section - Full Width Glassy Design */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between border border-gray-100 rounded-[2rem] p-2 mb-16 bg-gradient-to-r from-orange-50/50 to-white shadow-[0_20px_50px_rgba(255,90,0,0.05)] gap-4">
         <div className="flex items-center gap-4 px-6 py-4">
           <div className="bg-white p-3 rounded-2xl shadow-sm border border-orange-100">
@@ -97,7 +94,6 @@ export default function CarRental() {
           >
             <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-orange-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[2.5rem]"></div>
 
-            {/* Image Area */}
             <div className="relative w-full h-52 sm:h-56 flex items-center justify-center p-6 z-10 border-b border-gray-50 bg-gray-50/30">
               <div className="relative w-full h-full">
                 <Image
@@ -110,7 +106,6 @@ export default function CarRental() {
                 />
               </div>
 
-              {/* Status Indicator Pin */}
               <div className="absolute top-5 right-5">
                 <div className={`h-3 w-3 rounded-full shadow-md ${
                   car.status === "AVAILABLE" ? "bg-green-500 shadow-green-200" : "bg-red-500 shadow-red-200"
@@ -118,7 +113,6 @@ export default function CarRental() {
               </div>
             </div>
 
-            {/* Content Section with explicit structural controls */}
             <div className="p-6 flex flex-col grow z-10 gap-4">
               <div>
                 <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.2em] mb-1">{car.brand || 'Premium'}</p>
