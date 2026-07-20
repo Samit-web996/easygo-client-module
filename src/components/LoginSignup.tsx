@@ -109,9 +109,14 @@ const sendOTPRequest = async () => {
   try {
     setupRecaptcha();
     
+    const cleanMobile = mobile.trim();
+    const formattedMobile = cleanMobile.startsWith("+91") ? cleanMobile : `+91${cleanMobile}`;
+    
+    console.log("Sending OTP to:", formattedMobile); 
+    
     const result = await signInWithPhoneNumber(
       auth,
-      "+91" + mobile,
+      formattedMobile, 
       window.recaptchaVerifier!,
     );
     setConfirmation(result);

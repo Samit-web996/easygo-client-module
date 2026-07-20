@@ -135,7 +135,7 @@ export default function BookingPage() {
     }
   };
 
-  const handlePayment = async () => {
+const handlePayment = async () => {
     if (total <= 0) {
       alert("Invalid total amount");
       return;
@@ -158,8 +158,6 @@ export default function BookingPage() {
 
       const orderId = res.data.order_id;
       const amountInPaise = res.data.amount;
-      const savedEmail =
-        localStorage.getItem("temp_email") || localStorage.getItem("userEmail");
 
       const options = {
         key: res.data.key_id || "rzp_test_TBIqtPiYqReKC6",
@@ -176,7 +174,7 @@ export default function BookingPage() {
         },
         prefill: {
           name: localStorage.getItem("userName") || "User",
-          email: savedEmail,
+          email: "sunnybhasneiya@gmail.com",
           contact: localStorage.getItem("userMobile") || "",
         },
         theme: { color: "#f97316" }, 
